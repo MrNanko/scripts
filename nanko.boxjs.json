@@ -1,0 +1,39 @@
+{
+  "id": "nanko.app.sub",
+  "name": "MrNanko 脚本订阅",
+  "description": "该订阅兼容BoxJs以及QX Gallery",
+  "author": "@MrNanko",
+  "icon": "",
+  "repo": "https://github.com/MrNanko/scripts",
+  "apps": [
+    {
+      "id": "sync-cookie",
+      "name": "远程更新Cookie",
+      "author": "@MrNanko",
+      "repo": "",
+      "icons": [],
+      "keys": [
+        "sync-cookie-api-url",
+        "sync-cookie-authorization"
+      ],
+      "settings": [
+        {
+          "id": "sync-cookie-api-url",
+          "name": "API 地址",
+          "val": "",
+          "type": "text",
+          "autoGrow": true,
+          "desc": "API 地址"
+        },
+        {
+          "id": "sync-cookie-authorization",
+          "name": "API 授权码",
+          "val": "",
+          "type": "text",
+          "autoGrow": true,
+          "desc": "API 授权码"
+        }
+      ]
+    }
+  ]
+}

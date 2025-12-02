@@ -64,7 +64,7 @@ async function uploadToService(keySuffix, cookie) {
       },
       body: JSON.stringify({
         key: `sync-cookie:${config.cookieName}:${keySuffix}`,
-        value: JSON.stringify(cookie),
+        value: cookie,
         timeout: config.cookieTimeout
       }),
       timeout: 10000

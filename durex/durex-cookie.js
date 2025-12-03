@@ -1,15 +1,13 @@
 /*
-[Script]
-达美乐上传 = type=http-response,pattern=^https:\/\/game\.dominos\.com\.cn\/.+\/getUser?,requires-body=1,max-size=0,timeout=1000,script-path=https://gist.githubusercontent.com/MrNanko/4d993c83c05b02e6b93fe82b78abc2af/raw/dml_token.js,script-update-interval=0
-[MITM]
-hostname = %APPEND% game.dominos.com.cn
- */
+脚本作者：@MrNanko
+更新时间：2025/11/03
+*/
 
-const $ = new Env('达美乐');
+const $ = new Env('杜蕾斯会员中心');
 
 const config = {
-  appName: 'dominos',
-  cookieTimeout: 86400,
+  appName: 'durex',
+  cookieTimeout: 2592000, // 默认 1 个月有效期
   apiUrl: ($.isNode() ? process.env['sync-cookie-api-url'] : $.getdata('sync-cookie-api-url')) || '',
   authToken: ($.isNode() ? process.env['sync-cookie-authorization'] : $.getdata('sync-cookie-authorization')) || '',
 
@@ -24,33 +22,31 @@ const config = {
 !(async () => {
   const result = await getCookie();
   if (result) {
-    const { suffix, token } = result;
-    await uploadToService(suffix, token, false);
+    const { suffix, cookie, snId } = result;
+    await uploadToService(`userId:${suffix}`, cookie, false);
+    await uploadToService('snId', snId, false);
   }
 })()
   .catch((e) => $.logErr(e))
   .finally(() => $.done());
 
 async function getCookie() {
-  const authorization = $request.headers['Authorization'] || $request.headers['authorization'];
-  if (!authorization || !authorization.startsWith('Bearer ')) {
-    $.msg($.name, '❌ 未提供有效 Authorization 头', '', $.opts);
+  const accessToken = $request.headers['Access-Token'];
+  const userId = $.toObj($response.body)?.data?.user?.user_id;
+  const snId = $.toObj($response.body)?.data?.user?.sn_id;
+
+  if (!accessToken) {
+    console.log('⚠️ 未找到 Access Token');
     return null;
   }
 
-  const token = authorization.replace('Bearer ', '').trim();
-
-  const responseBody = $.toObj($response.body);
-  const mobile = responseBody?.content?.mobile;
-  const openid = responseBody?.content?.openid;
-
-  if (!mobile) {
-    $.msg($.name, '', '❌ 未找到手机号，请先绑定手机号', $.opts);
-    return;
+  if (!userId || !snId) {
+    console.log('⚠️ 响应 body 中未找到 user_id 或 sn_id');
+    return null;
   }
 
-  console.log(`✅ 获取到用户 ${desensitize(mobile)} 的 token: ${token}`);
-  return { suffix: mobile, token };
+  console.log(`✅ 获取到用户 ${userId} 的 Access Token: ${accessToken}, sn_id: ${snId}`);
+  return { suffix: userId, cookie: accessToken, snId };
 }
 
 async function uploadToService(suffix, cookie, shouldStringify = true) {

@@ -66,12 +66,6 @@ async function getCookie() {
     return null;
   }
 
-  const appID = $request.headers["HH-APP"];
-  if (appID != 'wxb33ed03c6c715482') {
-    console.log('⚠️ APP ID不匹配');
-    return null;
-  }
-
   const phone = body.data.phone;
   const cookie = { phone, token };
 

@@ -8,7 +8,7 @@ hostname = %APPEND% game.dominos.com.cn
 const $ = new Env('达美乐');
 
 const config = {
-  cookieName: "dominos",
+  appName: "dominos",
   cookieTimeout: 86400,
   apiUrl: ($.isNode() ? process.env["sync-cookie-api-url"] : $.getdata("sync-cookie-api-url")) || '',
   authToken: ($.isNode() ? process.env["sync-cookie-authorization"] : $.getdata("sync-cookie-authorization")) || '',
@@ -24,8 +24,8 @@ const config = {
 !(async () => {
   const result = await getCookie();
   if (result) {
-    const { mobile, token } = result;
-    await uploadToService(mobile, token);
+    const { suffix, token } = result;
+    await uploadToService(suffix, token, false);
   }
 })()
   .catch((e) => $.logErr(e))
@@ -50,10 +50,10 @@ async function getCookie() {
   }
 
   console.log(`✅ 获取到用户 ${desensitize(mobile)} 的 token: ${token}`);
-  return { mobile, token };
+  return { suffix: mobile, token };
 }
 
-async function uploadToService(keySuffix, cookie) {
+async function uploadToService(suffix, cookie, shouldStringify = true) {
   return new Promise((resolve) => {
 
     const opts = {
@@ -63,8 +63,8 @@ async function uploadToService(keySuffix, cookie) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        key: `sync-cookie:${config.cookieName}:${keySuffix}`,
-        value: cookie,
+        key: `sync-cookie:${config.appName}:${suffix}`,
+        value: shouldStringify ? JSON.stringify(cookie) : cookie,
         timeout: config.cookieTimeout
       }),
       timeout: 10000
@@ -91,9 +91,9 @@ async function uploadToService(keySuffix, cookie) {
       }
 
       if (res.code === 0) {
-        console.log(`✅ Cookie上传成功 - 用户: ${desensitize(keySuffix)}\nCookie: ${JSON.stringify(cookie)}`);
+        console.log(`✅ Cookie上传成功 - 用户: ${desensitize(suffix)}\nCookie: ${JSON.stringify(cookie)}`);
         if (config.notification.showSuccess) {
-          $.msg($.name, '✅ Cookie上传成功', `用户: ${desensitize(keySuffix)}\nCookie: ${JSON.stringify(cookie)}`, ``);
+          $.msg($.name, '✅ Cookie上传成功', `用户: ${desensitize(suffix)}\nCookie: ${JSON.stringify(cookie)}`, ``);
         }
         resolve(true);
       } else {

@@ -30,7 +30,7 @@ hostname = xiaodian.miyatech.com
 const $ = new Env('逢三得利吧');
 
 const config = {
-  cookieName: "suntory",
+  appName: "suntory",
   cookieTimeout: 2592000, // 默认 1 个月有效期
   apiUrl: ($.isNode() ? process.env["sync-cookie-api-url"] : $.getdata("sync-cookie-api-url")) || '',
   authToken: ($.isNode() ? process.env["sync-cookie-authorization"] : $.getdata("sync-cookie-authorization")) || '',
@@ -46,34 +46,33 @@ const config = {
 !(async () => {
   const result = await getCookie();
   if (result) {
-    const { phone, cookie } = result;
-    await uploadToService(phone, cookie);
+    const { suffix, cookie } = result;
+    await uploadToService(suffix, cookie);
   }
 })()
   .catch((e) => $.logErr(e))
   .finally(() => $.done());
 
 async function getCookie() {
-  const token = $request.headers["Authorization"] || $request.headers["authorization"];
+  const token = $request.headers?.Authorization ?? $request.headers?.authorization;
+  const phone = $.toObj($response.body)?.data?.phone;
+
   if (!token) {
     console.log('⚠️ 未找到Authorization token');
     return null;
   }
 
-  const body = $.toObj($response.body);
-  if (!body || !body.data || !body.data.phone) {
+  if (!phone) {
     console.log('⚠️ 响应body中未找到phone信息');
     return null;
   }
 
-  const phone = body.data.phone;
   const cookie = { phone, token };
-
   console.log(`✅ 获取到用户 ${desensitize(phone)} 的 token: ${JSON.stringify(cookie)}`);
-  return { phone, cookie };
+  return { suffix: phone, cookie };
 }
 
-async function uploadToService(keySuffix, cookie) {
+async function uploadToService(suffix, cookie, shouldStringify = true) {
   return new Promise((resolve) => {
 
     const opts = {
@@ -83,8 +82,8 @@ async function uploadToService(keySuffix, cookie) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        key: `sync-cookie:${config.cookieName}:${keySuffix}`,
-        value: JSON.stringify(cookie),
+        key: `sync-cookie:${config.appName}:${suffix}`,
+        value: shouldStringify ? JSON.stringify(cookie) : cookie,
         timeout: config.cookieTimeout
       }),
       timeout: 10000
@@ -111,9 +110,9 @@ async function uploadToService(keySuffix, cookie) {
       }
 
       if (res.code === 0) {
-        console.log(`✅ Cookie上传成功 - 用户: ${desensitize(keySuffix)}\nCookie: ${JSON.stringify(cookie)}`);
+        console.log(`✅ Cookie上传成功 - 用户: ${desensitize(suffix)}\nCookie: ${JSON.stringify(cookie)}`);
         if (config.notification.showSuccess) {
-          $.msg($.name, '✅ Cookie上传成功', `用户: ${desensitize(keySuffix)}\nCookie: ${JSON.stringify(cookie)}`, ``);
+          $.msg($.name, '✅ Cookie上传成功', `用户: ${desensitize(suffix)}\nCookie: ${JSON.stringify(cookie)}`, ``);
         }
         resolve(true);
       } else {

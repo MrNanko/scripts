@@ -1,36 +1,18 @@
 /*
-微信小程序：逢三得利吧获取 Cookie 并同步到 SyncCookie 项目
-
 脚本作者：@MrNanko
-更新时间：2025/11/02
-
-Surge配置
+更新时间：2025/11/03
 
 [Script]
-逢三得利吧_token同步 = type=http-response,pattern=^https:\/\/xiaodian\.miyatech\.com\/api\/user\/member\/info,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/suntory/suntory-cookie.js,timeout=15
+哈喽单车Cookie = type=http-request,pattern=^https:\/\/marketingapi\.hellobike\.com\/api\?mars\.task\.showTaskList,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/hellobike/hellobike-cookie.js
+
 [MITM]
-hostname = xiaodian.miyatech.com
-
-Quantumult X 配置
-
-[rewrite_local]
-^https:\/\/xiaodian\.miyatech\.com\/api\/user\/member\/info url script-response-body https://raw.githubusercontent.com/MrNanko/scripts/main/suntory/suntory-cookie.js
-[mitm]
-hostname = xiaodian.miyatech.com
-
-Loon 配置
-
-[Script]
-http-response ^https:\/\/xiaodian\.miyatech\.com\/api\/user\/member\/info tag=逢三得利吧_token同步, script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/suntory/suntory-cookie.js, requires-body=true, timeout=15
-[Mitm]
-hostname = xiaodian.miyatech.com
-
+hostname = %APPEND% marketingapi.hellobike.com
 */
 
-const $ = new Env('逢三得利吧');
+const $ = new Env('哈喽单车');
 
 const config = {
-  appName: 'suntory',
+  appName: 'hellobike',
   cookieTimeout: 2592000, // 默认 1 个月有效期
   apiUrl: ($.isNode() ? process.env['sync-cookie-api-url'] : $.getdata('sync-cookie-api-url')) || '',
   authToken: ($.isNode() ? process.env['sync-cookie-authorization'] : $.getdata('sync-cookie-authorization')) || '',
@@ -47,29 +29,44 @@ const config = {
   const result = await getCookie();
   if (result) {
     const { suffix, cookie } = result;
-    await uploadToService(suffix, cookie);
+    await uploadToService(`userId:${suffix}`, cookie, false);
   }
 })()
   .catch((e) => $.logErr(e))
   .finally(() => $.done());
 
 async function getCookie() {
-  const token = $request.headers?.Authorization ?? $request.headers?.authorization;
-  const phone = $.toObj($response.body)?.data?.phone;
+  try {
+    if ($request && $request.method === 'OPTIONS') {
+      console.log('⚠️ OPTIONS 请求,跳过处理');
+      return null;
+    }
 
-  if (!token) {
-    console.log('⚠️ 未找到Authorization token');
-    return null;
+    const Body = $.toObj($request.body);
+    if (!Body) {
+      console.log('⚠️ 请求 body 为空');
+      return null;
+    }
+
+    const { token, mobile, userNewId } = Body;
+
+    if (!(token && mobile && userNewId)) {
+      console.log('⚠️ 未找到必要的参数 (token, mobile, userNewId)');
+      return null;
+    }
+
+    const newData = {
+      "userId": userNewId,
+      "token": token,
+      "userName": mobile
+    };
+
+    console.log(`✅ 获取到用户 ${mobile} 的 Token`);
+    return { suffix: mobile, cookie: JSON.stringify(newData) };
+  } catch (e) {
+    console.log(`❌ getCookie 发生错误: ${e}`);
+    throw e;
   }
-
-  if (!phone) {
-    console.log('⚠️ 响应body中未找到phone信息');
-    return null;
-  }
-
-  const cookie = { phone, token };
-  console.log(`✅ 获取到用户 ${desensitize(phone)} 的 token: ${JSON.stringify(cookie)}`);
-  return { suffix: phone, cookie };
 }
 
 async function uploadToService(suffix, cookie, shouldStringify = true) {

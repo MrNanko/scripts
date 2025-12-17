@@ -29,7 +29,7 @@ const config = {
   const result = await getCookie();
   if (result) {
     const { suffix, cookie } = result;
-    await uploadToService(`userId:${suffix}`, cookie, false);
+    await uploadToService(`userId:${suffix}`, cookie);
   }
 })()
   .catch((e) => $.logErr(e))
@@ -42,27 +42,27 @@ async function getCookie() {
       return null;
     }
 
-    const Body = $.toObj($request.body);
-    if (!Body) {
+    const body = $.toObj($request.body);
+    if (!body) {
       console.log('⚠️ 请求 body 为空');
       return null;
     }
 
-    const { token, mobile, userNewId } = Body;
+    const { token, mobile, userId } = body;
 
-    if (!(token && mobile && userNewId)) {
-      console.log('⚠️ 未找到必要的参数 (token, mobile, userNewId)');
+    if (!(token && mobile && userId)) {
+      console.log('⚠️ 未找到必要的参数 (token, mobile, userId)');
       return null;
     }
 
-    const newData = {
-      "userId": userNewId,
+    const data = {
+      "userId": userId,
       "token": token,
-      "userName": mobile
+      "userName": desensitize(mobile)
     };
 
-    console.log(`✅ 获取到用户 ${mobile} 的 Token`);
-    return { suffix: mobile, cookie: JSON.stringify(newData) };
+    console.log(`✅ 获取到用户 ${desensitize(mobile)} 的 Token`);
+    return { suffix: mobile, cookie: data };
   } catch (e) {
     console.log(`❌ getCookie 发生错误: ${e}`);
     throw e;

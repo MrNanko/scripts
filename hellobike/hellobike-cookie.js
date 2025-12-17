@@ -29,7 +29,7 @@ const config = {
   const result = await getCookie();
   if (result) {
     const { suffix, cookie } = result;
-    await uploadToService(`userId:${suffix}`, cookie);
+    await uploadToService(suffix, cookie);
   }
 })()
   .catch((e) => $.logErr(e))
@@ -55,14 +55,14 @@ async function getCookie() {
       return null;
     }
 
-    const data = {
+    const cookie = {
       "userId": userId,
       "token": token,
       "userName": desensitize(mobile)
     };
 
-    console.log(`✅ 获取到用户 ${desensitize(mobile)} 的 Token`);
-    return { suffix: mobile, cookie: data };
+    console.log(`✅ 获取到用户 ${desensitize(mobile)} 的 Cookie：${JSON.stringify(cookie)}`);
+    return { suffix: mobile, cookie };
   } catch (e) {
     console.log(`❌ getCookie 发生错误: ${e}`);
     throw e;

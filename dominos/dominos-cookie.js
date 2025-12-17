@@ -1,6 +1,10 @@
 /*
+
+脚本作者：@MrNanko
+更新时间：2025/11/03
+
 [Script]
-达美乐上传 = type=http-response,pattern=^https:\/\/game\.dominos\.com\.cn\/.+\/getUser?,requires-body=1,max-size=0,timeout=1000,script-path=https://gist.githubusercontent.com/MrNanko/4d993c83c05b02e6b93fe82b78abc2af/raw/dml_token.js,script-update-interval=0
+达美乐上传 = type=http-response,pattern=^https:\/\/game\.dominos\.com\.cn\/.+\/getUser?,requires-body=1,max-size=0,timeout=1000,script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/dominos/dominos-cookie.js,script-update-interval=0
 [MITM]
 hostname = %APPEND% game.dominos.com.cn
  */

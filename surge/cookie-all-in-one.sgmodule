@@ -1,16 +1,21 @@
 #!name=Cookie All in one
-#!desc=重写获取 Cookie 并上传到服务器，包括达美乐小游戏微信小程序、逢三得利吧微信小程序、杜蕾斯会员中心微信小程序，哈喽单车App
+#!desc=重写获取 App 或微信小程序 Cookie 并上传到服务器
 
 [Script]
+# 达美乐小游戏（微信小程序）
 达美乐小游戏Cookie上传 = type=http-response,pattern=^https:\/\/game\.dominos\.com\.cn\/.+\/getUser?,script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/dominos/dominos-cookie.js,,script-update-interval=0,binary-body-mode=0,requires-body=1,max-size=0,timeout=1000
 
+# 逢三得利吧（微信小程序）
 逢三得利吧Token上传 = type=http-response,pattern=^https:\/\/xiaodian\.miyatech\.com\/api\/user\/member\/info,script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/suntory/suntory-cookie.js,script-update-interval=0,binary-body-mode=0,requires-body=1,max-size=0,timeout=1000
 
+# 杜蕾斯会员中心（微信小程序）
 杜蕾斯会员中心Cookie上传 = type=http-response,pattern=^https?:\/\/vip\.ixiliu\.cn\/mp\/activity\.lottery\/getUserInfoV2?,script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/durex/durex-cookie.js,script-update-interval=0,binary-body-mode=0,requires-body=1,max-size=0,timeout=1000
 
+# 哈喽单车
 哈喽单车Cookie上传 = type=http-request,pattern=^https:\/\/marketingapi\.hellobike\.com\/api\?mars\.task\.showTaskList,script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/hellobike/hellobike-cookie.js,script-update-interval=0,binary-body-mode=0,requires-body=1,max-size=0,timeout=1000
 
-iQOO社区Cookie = type=http-response,pattern=^https:\/\/bbs-api\.iqoo\.com\/api\/v3\/user\?userId=,script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/iqoo/iqoo-cookie.js,script-update-interval=0,binary-body-mode=0,requires-body=1,max-size=0,timeout=1000
+# IQOO社区（微信小程序）
+IQOO社区Cookie上传 = type=http-response,pattern=^https:\/\/bbs-api\.iqoo\.com\/api\/v3\/user\?userId=,script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/iqoo/iqoo-cookie.js,script-update-interval=0,binary-body-mode=0,requires-body=1,max-size=0,timeout=1000
 
 [MITM]
 hostname = %APPEND% game.dominos.com.cn, xiaodian.miyatech.com, vip.ixiliu.cn, marketingapi.hellobike.com, bbs-api.iqoo.com

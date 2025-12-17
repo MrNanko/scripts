@@ -3,7 +3,7 @@
 更新时间：2025/12/17
 
 [Script]
-iQOO社区Cookie = type=http-response,pattern=^https:\/\/bbs-api\.iqoo\.com\/api\/v3\/user\?userId=,requires-body=1,script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/qioo/iqoo-cookie.js,timeout=60
+iQOO社区Cookie = type=http-response,pattern=^https:\/\/bbs-api\.iqoo\.com\/api\/v3\/user\?userId=,requires-body=1,script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/iqoo/iqoo-cookie.js,timeout=60
 
 [MITM]
 hostname = %APPEND% bbs-api.iqoo.com

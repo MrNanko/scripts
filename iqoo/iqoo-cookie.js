@@ -53,21 +53,21 @@ async function getCookie() {
     }
 
     const userId = body?.Data?.id;
-    const mobile = body?.Data?.mobile;
+    // const mobile = body?.Data?.originalMobile;
 
-    if (!(userId && mobile)) {
-      console.log('⚠️ 未找到用户信息 (userId, mobile)');
+    if (!userId) {
+      console.log('⚠️ 未找到用户信息 (userId)');
       return null;
     }
 
     const cookie = {
       "userId": userId,
       "token": token,
-      "userName": desensitize(mobile)
+      "userName": userId
     };
 
-    console.log(`✅ 获取到用户 ${desensitize(mobile)} 的 Cookie：${JSON.stringify(cookie)}`);
-    return { suffix: mobile, cookie };
+    console.log(`✅ 获取到用户 ${userId} 的 Cookie：${JSON.stringify(cookie)}`);
+    return { suffix: userId, cookie };
   } catch (e) {
     console.log(`❌ getCookie 发生错误: ${e}`);
     throw e;

@@ -48,15 +48,14 @@ async function getCookie() {
       return null;
     }
 
-    const { token, mobile, userNewId } = body;
+    const { token, mobile } = body;
 
-    if (!(token && mobile && userNewId)) {
-      console.log('⚠️ 未找到必要的参数 (token, mobile, userNewId)');
+    if (!(token && mobile)) {
+      console.log('⚠️ 未找到必要的参数 (token, mobile)');
       return null;
     }
 
     const cookie = {
-      "userId": userNewId,
       "token": token,
       "userName": desensitize(mobile)
     };

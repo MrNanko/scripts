@@ -138,8 +138,8 @@ async function uploadToService(suffix, cookie, shouldStringify = true) {
 
 function updateUserData(list, newData, options = {}) {
   const {
-    keyColumn = 'id',
-    valueColumn = 'token',
+    keyColumn,
+    valueColumn,
     storageKey,
     name = $.name
   } = options

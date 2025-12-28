@@ -34,6 +34,26 @@
           "desc": "API 授权码"
         }
       ]
+    },
+    {
+      "id": "nanko-suntory",
+      "name": "逢三得利吧",
+      "author": "@MrNanko",
+      "repo": "",
+      "icons": [],
+      "keys": [
+        "suntory"
+      ],
+      "settings": [
+        {
+          "id": "suntory",
+          "name": "逢三得利吧 Cookie List",
+          "val": "",
+          "type": "text",
+          "autoGrow": true,
+          "desc": "逢三得利吧 Cookie List"
+        }
+      ]
     }
   ]
 }

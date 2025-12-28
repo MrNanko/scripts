@@ -43,6 +43,8 @@ const config = {
   },
 }
 
+const userList = ($.isNode() ? JSON.parse(process.env.suntory) : $.getjson(config.appName)) || [];
+
 !(async () => {
   const result = await getCookie();
   if (result) {
@@ -68,8 +70,16 @@ async function getCookie() {
   }
 
   const cookie = { phone, token };
+
+  // 使用通用方法
+  const isUpdate = updateUserData(userList, cookie, {
+    keyColumn: 'phone',
+    valueColumn: 'token',
+    storageKey: config.appName
+  });
+
   console.log(`✅ 获取到用户 ${desensitize(phone)} 的 token: ${JSON.stringify(cookie)}`);
-  return { suffix: phone, cookie };
+  return isUpdate === true ? { suffix: phone, cookie } : null;
 }
 
 async function uploadToService(suffix, cookie, shouldStringify = true) {
@@ -124,6 +134,42 @@ async function uploadToService(suffix, cookie, shouldStringify = true) {
       }
     });
   });
+}
+
+function updateUserData(list, newData, options = {}) {
+  const {
+    keyColumn = 'id',
+    valueColumn = 'token',
+    storageKey,
+    name = $.name
+  } = options
+
+  const key = newData[keyColumn]
+  const value = newData[valueColumn]
+
+  const index = list.findIndex(e => e[keyColumn] === key);
+
+  if (index !== -1) {
+    // update
+    if (list[index][valueColumn] === value) {
+      return false;
+    }
+
+    list[index] = newData;
+    $.msg(name, `🎉 Cookie更新成功 - 用户: ${key}\nCookie: ${JSON.stringify(newData)}`, ``);
+  } else {
+    // insert
+    list.push(newData);
+    $.msg(name, `🎉 Cookie新增成功 - 用户: ${key}\nCookie: ${JSON.stringify(newData)}`, ``);
+  }
+
+  console.log(JSON.stringify(newData));
+
+  if (storageKey) {
+    $.setjson(list, storageKey);
+  }
+
+  return true;
 }
 
 /**

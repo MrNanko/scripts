@@ -24,7 +24,7 @@ const config = {
   const result = await getCookie();
   if (result) {
     const { suffix, cookie } = result;
-    await uploadToService(`userId:${suffix}`, cookie, true);
+    await uploadToService(`${suffix}`, cookie, true);
   }
 })()
   .catch((e) => $.logErr(e))

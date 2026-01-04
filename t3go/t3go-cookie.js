@@ -1,19 +1,14 @@
 /*
 脚本作者：@MrNanko
-更新时间：2025/11/03
+更新时间：2026/01/04
 
-[Script]
-哈喽单车Cookie = type=http-request,pattern=^https:\/\/marketingapi\.hellobike\.com\/api\?mars\.task\.showTaskList,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/hellobike/hellobike-cookie.js
-
-[MITM]
-hostname = %APPEND% marketingapi.hellobike.com
 */
 
-const $ = new Env('哈喽单车');
+const $ = new Env('T3出行');
 
 const config = {
-  appName: 'hellobike',
-  cookieTimeout: 7776000, // 默认 3 个月有效期
+  appName: 't3go',
+  cookieTimeout: 2592000, // 默认 1 个月有效期
   apiUrl: ($.isNode() ? process.env['sync-cookie-api-url'] : $.getdata('sync-cookie-api-url')) || '',
   authToken: ($.isNode() ? process.env['sync-cookie-authorization'] : $.getdata('sync-cookie-authorization')) || '',
 
@@ -29,43 +24,43 @@ const config = {
   const result = await getCookie();
   if (result) {
     const { suffix, cookie } = result;
-    await uploadToService(suffix, cookie);
+    await uploadToService(`userId:${suffix}`, cookie, true);
   }
 })()
   .catch((e) => $.logErr(e))
   .finally(() => $.done());
 
 async function getCookie() {
-  try {
-    if ($request && $request.method === 'OPTIONS') {
-      console.log('⚠️ OPTIONS 请求,跳过处理');
-      return null;
-    }
-
-    const body = $.toObj($request.body);
-    if (!body) {
-      console.log('⚠️ 请求 body 为空');
-      return null;
-    }
-
-    const { token, mobile } = body;
-
-    if (!(token && mobile)) {
-      console.log('⚠️ 未找到必要的参数 (token, mobile)');
-      return null;
-    }
-
-    const cookie = {
-      "token": token,
-      "userName": desensitize(mobile)
-    };
-
-    console.log(`✅ 获取到用户 ${desensitize(mobile)} 的 Cookie：${JSON.stringify(cookie)}`);
-    return { suffix: mobile, cookie };
-  } catch (e) {
-    console.log(`❌ getCookie 发生错误: ${e}`);
-    throw e;
+  if ($request && $request.method === 'OPTIONS') {
+    console.log('⚠️ OPTIONS 请求，跳过处理');
+    return null;
   }
+
+  const headers = ObjectKeys2LowerCase($request.headers);
+  const body = $.toObj($response.body);
+  const token = headers["token"];
+  const userId = body?.data?.userId;
+  const userName = body?.data?.nicknameText;
+
+  if (!token) {
+    console.log('⚠️ 未找到 token');
+    return null;
+  }
+
+  if (!userId) {
+    console.log('⚠️ 响应 body 中未找到 userId');
+    return null;
+  }
+
+  console.log(`✅ 获取到用户 ${userName || userId} 的 token: ${token}`);
+
+  const cookieData = {
+    userId: userId,
+    token: token,
+    userName: userName
+  };
+
+  return { suffix: userName, cookie: cookieData };
 }
 
 async function uploadToService(suffix, cookie, shouldStringify = true) {
@@ -106,9 +101,10 @@ async function uploadToService(suffix, cookie, shouldStringify = true) {
       }
 
       if (res.code === 0) {
-        console.log(`✅ Cookie上传成功 - 用户: ${desensitize(suffix)}\nCookie: ${JSON.stringify(cookie)}`);
+        const userName = cookie?.userName || suffix;
+        console.log(`✅ Cookie上传成功 - 账号: ${desensitize(userName)}\nCookie: ${JSON.stringify(cookie)}`);
         if (config.notification.showSuccess) {
-          $.msg($.name, '✅ Cookie上传成功', `用户: ${desensitize(suffix)}\nCookie: ${JSON.stringify(cookie)}`, ``);
+          $.msg($.name, `🎉 账号[${userName}]更新token成功!`, `用户ID: ${desensitize(suffix)}`, ``);
         }
         resolve(true);
       } else {
@@ -120,6 +116,14 @@ async function uploadToService(suffix, cookie, shouldStringify = true) {
       }
     });
   });
+}
+
+/**
+ * 将对象的键名转换为小写
+ * @param {Object} obj - 需要转换的对象
+ */
+function ObjectKeys2LowerCase(obj) {
+  return !obj ? {} : Object.fromEntries(Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]));
 }
 
 /**

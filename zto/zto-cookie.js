@@ -25,7 +25,7 @@ const config = {
     },
 };
 
-(async () => {
+!(async () => {
     const result = await getCookie();
     if (result) {
         const { suffix, cookie } = result;

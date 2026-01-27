@@ -52,12 +52,12 @@ async function getCookie() {
             return null;
         }
 
-        const userId = body?.data?.mobile;
+        const encryptMobile = body?.data?.encryptMobile;
 
         const cookie = {
-            "userId": userId,
+            "userId": encryptMobile,
             "token": token,
-            "userName": userId
+            "userName": encryptMobile
         };
 
         console.log(`✅ 获取到用户 ${userId} 的 Cookie：${JSON.stringify(cookie)}`);

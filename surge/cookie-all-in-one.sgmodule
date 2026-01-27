@@ -23,5 +23,8 @@ IQOO社区Cookie上传 = type=http-response,pattern=^https:\/\/bbs-api\.iqoo\.co
 # T3打车（微信小程序）
 T3打车Cookie上传 = type=http-response,pattern=^https:\/\/passenger\.t3go\.cn\/cua-user-api-c\/api\/user\/passengerInfoNew,script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/t3go/t3go-cookie.js,script-update-interval=0,binary-body-mode=0,requires-body=1,max-size=0,timeout=1000
 
+# 中通快递（微信小程序）
+中通快递Cookie上传 = type=http-response,pattern=^https:\/\/membergateway\.zto\.com\/getMember,script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/zto/zto-cookie.js,script-update-interval=0,binary-body-mode=0,requires-body=1,max-size=0,timeout=1000
+
 [MITM]
-hostname = %APPEND% game.dominos.com.cn, xiaodian.miyatech.com, vip.ixiliu.cn, marketingapi.hellobike.com, bbs-api.iqoo.com, gw2c-hw-open.longfor.com, passenger.t3go.cn
+hostname = %APPEND% game.dominos.com.cn, xiaodian.miyatech.com, vip.ixiliu.cn, marketingapi.hellobike.com, bbs-api.iqoo.com, gw2c-hw-open.longfor.com, passenger.t3go.cn, membergateway.zto.com

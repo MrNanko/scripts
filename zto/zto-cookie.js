@@ -60,8 +60,8 @@ async function getCookie() {
             "userName": encryptMobile
         };
 
-        console.log(`✅ 获取到用户 ${userId} 的 Cookie：${JSON.stringify(cookie)}`);
-        return { suffix: userId, cookie };
+        console.log(`✅ 获取到用户 ${encryptMobile} 的 Cookie：${JSON.stringify(cookie)}`);
+        return { suffix: encryptMobile, cookie };
     } catch (e) {
         console.log(`❌ getCookie 发生错误: ${e}`);
         throw e;

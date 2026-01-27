@@ -146,7 +146,7 @@ function desensitize(str) {
     if (parts[0].length > 2) {
       return parts[0].slice(0, 2) + '****@' + parts[1];
     }
-    return str.replace(/(.{1}).*(@.*)/, '$1****$2');
+    return str.replace(/(.).*(@.*)/, '$1****$2');
   }
 
   // 通用脱敏（中间部分）

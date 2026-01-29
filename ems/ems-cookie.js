@@ -1,13 +1,13 @@
 /*
 脚本作者：@MrNanko
-更新时间：2025/12/17
+更新时间：2026/01/29
 
 */
 
-const $ = new Env('中通快递');
+const $ = new Env('邮惠中心');
 
 const config = {
-    appName: 'zto',
+    appName: 'ems',
     cookieTimeout: 2592000, // 默认 1 个月有效期
     apiUrl: ($.isNode() ? process.env['sync-cookie-api-url'] : $.getdata('sync-cookie-api-url')) || '',
     authToken: ($.isNode() ? process.env['sync-cookie-authorization'] : $.getdata('sync-cookie-authorization')) || '',
@@ -40,23 +40,24 @@ async function getCookie() {
         const headers = ObjectKeys2LowerCase($request.headers) || {};
         const body = $.toObj($response.body);
 
-        const token = headers['x-token'];
+        const userId = body?.info?.memberId;
+        const token = headers["auth-token"];
+        const userName = body?.info?.phone;
+
 
         if (!(token && body)) {
-            console.log('⚠️ 未找到必要的参数 (token, body)');
+            console.log('⚠️ 获取token失败！参数缺失');
             return null;
         }
 
-        const encryptMobile = body?.data?.encryptMobile;
-
         const cookie = {
-            "userId": encryptMobile,
+            "userId": userId,
             "token": token,
-            "userName": encryptMobile
+            "userName": userName
         };
 
-        console.log(`✅ 获取到用户 ${encryptMobile} 的 Cookie：${JSON.stringify(cookie)}`);
-        return { suffix: encryptMobile, cookie };
+        console.log(`✅ 获取到用户 ${userName} 的 Cookie：${JSON.stringify(cookie)}`);
+        return { suffix: userName, cookie };
     } catch (e) {
         console.log(`❌ getCookie 发生错误: ${e}`);
         throw e;

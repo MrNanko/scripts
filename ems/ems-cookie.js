@@ -40,9 +40,9 @@ async function getCookie() {
         const headers = ObjectKeys2LowerCase($request.headers) || {};
         const body = $.toObj($response.body);
 
-        const userId = body?.info?.memberId;
+        const userId = body?.result?.userId;
         const token = headers["auth-token"];
-        const userName = body?.info?.phone;
+        const userName = body?.result?.phone;
 
 
         if (!(token && body)) {

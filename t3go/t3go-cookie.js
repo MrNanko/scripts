@@ -8,7 +8,7 @@ const $ = new Env('T3出行');
 
 const config = {
   appName: 't3go',
-  cookieTimeout: 2592000, // 默认 1 个月有效期
+  cookieTimeout: 259200000, // 默认 1 个月有效期
   apiUrl: ($.isNode() ? process.env['sync-cookie-api-url'] : $.getdata('sync-cookie-api-url')) || '',
   authToken: ($.isNode() ? process.env['sync-cookie-authorization'] : $.getdata('sync-cookie-authorization')) || '',
 

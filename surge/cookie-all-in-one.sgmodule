@@ -29,5 +29,7 @@ T3打车Cookie上传 = type=http-response,pattern=^https:\/\/passenger\.t3go\.cn
 # 邮惠中心（微信小程序）
 邮惠中心Cookie上传 = type=http-response,pattern=^https:\/\/ec\.ems\.com\.cn\/ecr-miu-web\/login\/queryUserLoginStatus,script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/ems/ems-cookie.js,script-update-interval=0,binary-body-mode=0,requires-body=1,max-size=0,timeout=1000
 
+# 酷动潮玩（微信小程序）
+酷动潮玩Cookie上传 = type=http-response,pattern=^https:\/\/xcx\.coofans\.com\/api\/userinfo,script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/coofans/coofans-cookie.js,script-update-interval=0,binary-body-mode=0,requires-body=1,max-size=0,timeout=1000
 [MITM]
-hostname = %APPEND% game.dominos.com.cn, xiaodian.miyatech.com, vip.ixiliu.cn, marketingapi.hellobike.com, bbs-api.iqoo.com, gw2c-hw-open.longfor.com, passenger.t3go.cn, membergateway.zto.com
+hostname = %APPEND% game.dominos.com.cn, xiaodian.miyatech.com, vip.ixiliu.cn, marketingapi.hellobike.com, bbs-api.iqoo.com, gw2c-hw-open.longfor.com, passenger.t3go.cn, membergateway.zto.com, ec.ems.com, xcx.coofans.com

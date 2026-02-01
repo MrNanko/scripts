@@ -1,138 +1,128 @@
 /*
 脚本作者：@MrNanko
-更新时间：2025/12/17
+更新时间：2026/02/01
 
-[Script]
-iQOO社区Cookie = type=http-response,pattern=^https:\/\/bbs-api\.iqoo\.com\/api\/v3\/user\?userId=,requires-body=1,script-path=https://raw.githubusercontent.com/MrNanko/scripts/main/iqoo/iqoo-cookie.js,timeout=60
-
-[MITM]
-hostname = %APPEND% bbs-api.iqoo.com
 */
 
-const $ = new Env('iQOO社区');
+const $ = new Env('邮惠中心');
 
 const config = {
-  appName: 'iqoo',
-  cookieTimeout: 259200000, // 默认 1 个月有效期
-  apiUrl: ($.isNode() ? process.env['sync-cookie-api-url'] : $.getdata('sync-cookie-api-url')) || '',
-  authToken: ($.isNode() ? process.env['sync-cookie-authorization'] : $.getdata('sync-cookie-authorization')) || '',
+    appName: 'coofans',
+    cookieTimeout: 259200000, // 默认 1 个月有效期
+    apiUrl: ($.isNode() ? process.env['sync-cookie-api-url'] : $.getdata('sync-cookie-api-url')) || '',
+    authToken: ($.isNode() ? process.env['sync-cookie-authorization'] : $.getdata('sync-cookie-authorization')) || '',
 
-  // notify config
-  notification: {
-    autoDismiss: 10,      // 自动消失时间（秒）
-    showSuccess: true,    // 是否显示成功通知
-    silentOnError: false, // 错误时是否静默（不显示通知）
-  },
-}
+    // notify config
+    notification: {
+        autoDismiss: 10,      // 自动消失时间（秒）
+        showSuccess: true,    // 是否显示成功通知
+        silentOnError: false, // 错误时是否静默（不显示通知）
+    },
+};
 
 !(async () => {
-  const result = await getCookie();
-  if (result) {
-    const { suffix, cookie } = result;
-    await uploadToService(suffix, cookie);
-  }
+    const result = await getCookie();
+    if (result) {
+        const { suffix, cookie } = result;
+        await uploadToService(suffix, cookie);
+    }
 })()
-  .catch((e) => $.logErr(e))
-  .finally(() => $.done());
+    .catch((e) => $.logErr(e))
+    .finally(() => $.done());
 
 async function getCookie() {
-  try {
-    if ($request && $request.method === 'OPTIONS') {
-      console.log('⚠️ OPTIONS 请求,跳过处理');
-      return null;
+    try {
+        if ($request && $request.method === 'OPTIONS') {
+            console.log('⚠️ OPTIONS 请求,跳过处理');
+            return null;
+        }
+
+        const headers = ObjectKeys2LowerCase($request.headers) || {};
+        const body = $.toObj($response.body);
+
+        const userId = body?.data?.uid;
+        const token = headers["authorization"];
+        const userName = body?.data?.phone;
+
+
+        if (!(token && body)) {
+            console.log('⚠️ 获取token失败！参数缺失');
+            return null;
+        }
+
+        const cookie = {
+            "userId": userId,
+            "token": token,
+            "userName": userName
+        };
+
+        console.log(`✅ 获取到用户 ${userName} 的 Cookie：${JSON.stringify(cookie)}`);
+        return { suffix: userName, cookie };
+    } catch (e) {
+        console.log(`❌ getCookie 发生错误: ${e}`);
+        throw e;
     }
-
-    const header = ObjectKeys2LowerCase($request.headers) || {};
-    const body = $.toObj($response.body);
-
-    const token = header['authorization'];
-
-    if (!(token && body)) {
-      console.log('⚠️ 未找到必要的参数 (token, body)');
-      return null;
-    }
-
-    const userId = body?.Data?.id;
-    // const mobile = body?.Data?.originalMobile;
-
-    if (!userId) {
-      console.log('⚠️ 未找到用户信息 (userId)');
-      return null;
-    }
-
-    const cookie = {
-      "userId": userId,
-      "token": token,
-      "userName": userId
-    };
-
-    console.log(`✅ 获取到用户 ${userId} 的 Cookie：${JSON.stringify(cookie)}`);
-    return { suffix: userId, cookie };
-  } catch (e) {
-    console.log(`❌ getCookie 发生错误: ${e}`);
-    throw e;
-  }
 }
 
 async function uploadToService(suffix, cookie, shouldStringify = true) {
-  return new Promise((resolve) => {
+    return new Promise((resolve) => {
 
-    const opts = {
-      url: config.apiUrl,
-      headers: {
-        'Authorization': `Bearer ${config.authToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        key: `sync-cookie:${config.appName}:${suffix}`,
-        value: shouldStringify ? JSON.stringify(cookie) : cookie,
-        timeout: config.cookieTimeout
-      }),
-      timeout: 10000
-    };
+        const opts = {
+            url: config.apiUrl,
+            headers: {
+                'Authorization': `Bearer ${config.authToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                key: `sync-cookie:${config.appName}:${suffix}`,
+                value: shouldStringify ? JSON.stringify(cookie) : cookie,
+                timeout: config.cookieTimeout
+            }),
+            timeout: 10000
+        };
 
-    $.post(opts, (err, resp, data) => {
-      if (err) {
-        console.log(`❌ API请求失败: ${err}`);
-        if (!config.notification.silentOnError) {
-          $.msg($.name, '❌ Cookie上传失败', `请求错误: ${err}`, $.opts);
-        }
-        resolve(false);
-        return;
-      }
+        $.post(opts, (err, resp, data) => {
+            if (err) {
+                console.log(`❌ API请求失败: ${err}`);
+                if (!config.notification.silentOnError) {
+                    $.msg($.name, '❌ Cookie上传失败', `请求错误: ${err}`, $.opts);
+                }
+                resolve(false);
+                return;
+            }
 
-      let res;
-      try {
-        res = JSON.parse(data);
-      } catch (e) {
-        console.log(`⚠️ 解析响应失败: ${e}，返回结果: ${data}`);
-        $.msg($.name, '⚠️ Cookie上传异常', `HTTP状态码 ${resp ? resp.statusCode : '未知'}`, ``);
-        resolve(false);
-        return;
-      }
+            let res;
+            try {
+                res = JSON.parse(data);
+            } catch (e) {
+                console.log(`⚠️ 解析响应失败: ${e}，返回结果: ${data}`);
+                $.msg($.name, '⚠️ Cookie上传异常', `HTTP状态码 ${resp ? resp.statusCode : '未知'}`, ``);
+                resolve(false);
+                return;
+            }
 
-      if (res.code === 0) {
-        console.log(`✅ Cookie上传成功 - 用户: ${desensitize(suffix)}\nCookie: ${JSON.stringify(cookie)}`);
-        if (config.notification.showSuccess) {
-          $.msg($.name, '✅ Cookie上传成功', `用户: ${desensitize(suffix)}\nCookie: ${JSON.stringify(cookie)}`, ``);
-        }
-        resolve(true);
-      } else {
-        console.log(`⚠️ API错误: ${res.message}`);
-        if (!config.notification.silentOnError) {
-          $.msg($.name, '❌ Cookie上传失败', `API错误: ${res.message}`, $.opts);
-        }
-        resolve(false);
-      }
+            if (res.code === 0) {
+                console.log(`✅ Cookie上传成功 - 用户: ${desensitize(suffix)}\nCookie: ${JSON.stringify(cookie)}`);
+                if (config.notification.showSuccess) {
+                    $.msg($.name, '✅ Cookie上传成功', `用户: ${desensitize(suffix)}\nCookie: ${JSON.stringify(cookie)}`, ``);
+                }
+                resolve(true);
+            } else {
+                console.log(`⚠️ API错误: ${res.message}`);
+                if (!config.notification.silentOnError) {
+                    $.msg($.name, '❌ Cookie上传失败', `API错误: ${res.message}`, $.opts);
+                }
+                resolve(false);
+            }
+        });
     });
-  });
 }
 
 function ObjectKeys2LowerCase(obj) {
-  return Object.keys(obj || {}).reduce((result, key) => {
-    result[key.toLowerCase()] = obj[key];
-    return result;
-  }, {});
+    return Object.keys(obj || {}).reduce((result, key) => {
+        result[key.toLowerCase()] = obj[key];
+        return result;
+    }, {});
 }
 
 /**
@@ -140,33 +130,33 @@ function ObjectKeys2LowerCase(obj) {
  * @param {String} str - 需要脱敏的字符串
  */
 function desensitize(str) {
-  if (!str || typeof str !== 'string') return str;
+    if (!str || typeof str !== 'string') return str;
 
-  // 手机号脱敏（支持 +86、86 前缀）
-  const cleanStr = str.replace(/\D/g, '');
-  if (/^(?:86)?1[3-9]\d{9}$/.test(cleanStr)) {
-    const phone = cleanStr.slice(-11);
-    return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
-  }
-
-  // 邮箱脱敏
-  if (/@/.test(str)) {
-    const parts = str.split('@');
-    if (parts[0].length > 2) {
-      return parts[0].slice(0, 2) + '****@' + parts[1];
+    // 手机号脱敏（支持 +86、86 前缀）
+    const cleanStr = str.replace(/\D/g, '');
+    if (/^(?:86)?1[3-9]\d{9}$/.test(cleanStr)) {
+        const phone = cleanStr.slice(-11);
+        return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
     }
-    return str.replace(/(.{1}).*(@.*)/, '$1****$2');
-  }
 
-  // 通用脱敏（中间部分）
-  if (str.length > 6) {
-    const start = str.slice(0, 3);
-    const end = str.slice(-3);
-    return `${start}****${end}`;
-  }
+    // 邮箱脱敏
+    if (/@/.test(str)) {
+        const parts = str.split('@');
+        if (parts[0].length > 2) {
+            return parts[0].slice(0, 2) + '****@' + parts[1];
+        }
+        return str.replace(/(.).*(@.*)/, '$1****$2');
+    }
 
-  // 短字符串不脱敏
-  return str;
+    // 通用脱敏（中间部分）
+    if (str.length > 6) {
+        const start = str.slice(0, 3);
+        const end = str.slice(-3);
+        return `${start}****${end}`;
+    }
+
+    // 短字符串不脱敏
+    return str;
 }
 
 // ==================== Env框架 ====================

@@ -8,7 +8,7 @@ const $ = new Env('邮惠中心');
 
 const config = {
     appName: 'ems',
-    cookieTimeout: 2592000, // 默认 1 个月有效期
+    cookieTimeout: 259200000, // 默认 1 个月有效期
     apiUrl: ($.isNode() ? process.env['sync-cookie-api-url'] : $.getdata('sync-cookie-api-url')) || '',
     authToken: ($.isNode() ? process.env['sync-cookie-authorization'] : $.getdata('sync-cookie-authorization')) || '',
 

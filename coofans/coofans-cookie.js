@@ -4,7 +4,7 @@
 
 */
 
-const $ = new Env('邮惠中心');
+const $ = new Env('酷动Coofans');
 
 const config = {
     appName: 'coofans',

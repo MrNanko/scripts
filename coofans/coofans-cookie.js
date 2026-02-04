@@ -45,9 +45,9 @@ async function getCookie() {
         const userName = body?.data?.phone;
 
 
-        if (!(token && body)) {
-            console.log('⚠️ 获取token失败！参数缺失');
-            return null;
+        if (userName === undefined || userName === null) {
+            console.log('❌ 未能获取到用户名称');
+            return null
         }
 
         const cookie = {

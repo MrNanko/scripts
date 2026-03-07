@@ -42,7 +42,7 @@ const userList = (() => {
 
 async function getCookie() {
 
-    const body = $.toObj($response?.body);
+    const body = $.toObj($request?.body);
     const userId = body?.userId;
     const token = {
         "url": $request?.url,

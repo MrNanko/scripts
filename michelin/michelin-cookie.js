@@ -41,12 +41,14 @@ async function getCookie() {
         const body = $.toObj($response.body);
 
         const userId = body?.data?.member?.unionId;
-        const token = body?.data?.token?.refresh_token;
+        const refresh_token = body?.data?.token?.refresh_token;
+        const access_token = body?.data?.token?.access_token;
         const mobile = body?.data?.member?.mobile;
 
         const cookie = {
             "userId": userId,
-            "token": token,
+            "refresh_token": refresh_token,
+            "access_token": access_token,
             "userName": desensitize(mobile)
         }
 

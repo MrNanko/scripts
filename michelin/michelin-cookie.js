@@ -19,7 +19,7 @@ const config = {
         showSuccess: true,    // 是否显示成功通知
         silentOnError: false, // 错误时是否静默（不显示通知）
     },
-}
+};
 
 (async () => {
     const result = await getCookie();
@@ -39,19 +39,46 @@ async function getCookie() {
         }
 
         const body = $.toObj($response.body);
+        const tokenData = body?.data?.token || {};
+        const member = body?.data?.member || {};
+        const wxUser = body?.data?.wx_user || {};
 
-        const userId = body?.data?.member?.unionId;
-        const token = body?.data?.token?.refresh_token;
-        const mobile = body?.data?.member?.mobile;
-
-        const cookie = {
-            "userId": userId,
-            "token": token,
-            "userName": desensitize(mobile)
+        if (!(body?.code === 200 && body?.result === true)) {
+            console.log(`⚠️ 登录响应异常: code=${body?.code}, result=${body?.result}`);
+            return null;
         }
 
-        console.log(`✅ 获取到用户 ${desensitize(mobile)} 的 Cookie：${JSON.stringify(cookie)}`);
-        return { suffix: desensitize(mobile), cookie };
+        const userId = member?.unionId || wxUser?.unionid || member?.goldenId;
+        const refreshToken = tokenData?.refresh_token;
+        const accessToken = tokenData?.access_token;
+        const mobile = member?.mobile || '';
+        const userName = desensitize(String(mobile || member?.goldenId || userId || ''));
+
+        if (!(userId && refreshToken)) {
+            console.log('⚠️ 响应 body 中未找到必要参数 (userId, refreshToken)');
+            return null;
+        }
+
+        const cookie = {
+            userId,
+            userName,
+            token: refreshToken,
+            refreshToken,
+            accessToken,
+            authorization: accessToken ? `Bearer ${accessToken}` : '',
+            goldenId: member?.goldenId || '',
+            unionId: member?.unionId || wxUser?.unionid || '',
+            openId: wxUser?.openid || '',
+            mobile,
+            avatar: member?.avatarImg || '',
+            tokenType: tokenData?.token_type || '',
+            scope: tokenData?.scope || '',
+            expiresIn: tokenData?.expires_in ?? '',
+            createDate: tokenData?.create_date ?? ''
+        };
+
+        console.log(`✅ 获取到用户 ${userName || userId} 的 Cookie：${JSON.stringify(cookie)}`);
+        return { suffix: userId, cookie };
     } catch (e) {
         console.log(`❌ getCookie 发生错误: ${e}`);
         throw e;
